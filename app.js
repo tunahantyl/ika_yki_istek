@@ -9,7 +9,7 @@
     ping: 22, speed: 3.2, heading: 128,
     signalDbm: -52,
     roll: -1.2, pitch: 3.5, yaw: 127.8,
-    lat: 39.9255, lon: 32.8661, sats: 12,
+    lat: 40.992166, lon: 39.774509558, sats: 12,
     logPaused: false, confirmEnabled: true,
     aiOverlayOn: true, hudOn: true, recording: false,
     targetDist: 245,

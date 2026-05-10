@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="tr">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,10 +8,13 @@
     <title>İKA - Yer Kontrol İstasyonu</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Share+Tech+Mono&display=swap"
+        rel="stylesheet">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
     <!-- Top Header Bar -->
     <header id="header-bar">
@@ -140,17 +144,17 @@
                 <div class="widget-label">GPS</div>
                 <div class="gps-display">
                     <div class="gps-row">
-                        <span id="gps-lat" class="gps-value">39.9255°K</span>
+                        <span id="gps-lat" class="gps-value">40.992166°K</span>
                     </div>
                     <div class="gps-row">
-                        <span id="gps-lon" class="gps-value">32.8661°D</span>
+                        <span id="gps-lon" class="gps-value">39.7745095580°D</span>
                     </div>
                     <div class="gps-row">
                         <span class="gps-label">Uydu:</span>
                         <span id="gps-sats" class="gps-value">12</span>
                         <span class="gps-label" style="margin-left:8px">Fix:</span>
                         <span id="gps-fix" class="gps-fix-status fix-3d">3D</span>
-                    </div>
+                    </div>39.7745095580
                 </div>
             </div>
         </aside>
@@ -208,7 +212,7 @@
                     </div>
                     <!-- HUD Bottom -->
                     <div class="hud-bottom-info">
-                        <span id="hud-coords" class="hud-coords">39.9255°K  32.8661°D</span>
+                        <span id="hud-coords" class="hud-coords">39.9255°K 32.8661°D</span>
                     </div>
                     <!-- AI Bounding Boxes (dynamic) -->
                     <div id="ai-overlay" class="ai-overlay"></div>
@@ -372,4 +376,5 @@
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script src="app.js"></script>
 </body>
+
 </html>
