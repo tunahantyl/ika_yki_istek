@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="İnsansız Kara Aracı - Yer Kontrol İstasyonu Arayüzü - Teknofest">
+    <title>İKA - Yer Kontrol İstasyonu</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- Top Header Bar -->
+    <header id="header-bar">
+        <div class="header-left">
+            <div class="header-logo">
+                <span class="logo-icon">◆</span>
+                <span class="logo-text">İKA · YKİ</span>
+            </div>
+            <div class="header-meta">
+                <span id="header-date" class="meta-item"></span>
+                <span id="header-time" class="meta-item time-display"></span>
+            </div>
+        </div>
+        <div class="header-center">
+            <div id="mode-indicator" class="mode-indicator mode-manuel">
+                <div class="mode-pulse"></div>
+                <span class="mode-label">MOD:</span>
+                <span id="mode-text" class="mode-text">MANUEL</span>
+            </div>
+        </div>
+        <div class="header-right">
+            <div class="header-status">
+                <div class="status-dot" id="connection-dot"></div>
+                <span id="connection-status">BAĞLI</span>
+            </div>
+            <button id="btn-emergency-top" class="btn-emergency-top" title="ACİL DURDURMA">
+                <span class="emergency-icon">■</span>
+                ACİL DURDURMA
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Layout -->
+    <main id="main-layout">
+        <!-- Left Panel: Telemetry -->
+        <aside id="left-panel" class="panel">
+            <div class="panel-header">
+                <span class="panel-title">TELEMETRİ</span>
+                <span class="panel-indicator active"></span>
+            </div>
+
+            <!-- Battery -->
+            <div class="telemetry-widget" id="battery-widget">
+                <div class="widget-label">BATARYA</div>
+                <div class="battery-container">
+                    <div class="battery-bar">
+                        <div id="battery-fill" class="battery-fill" style="height: 78%"></div>
+                        <div class="battery-segments">
+                            <div class="segment"></div>
+                            <div class="segment"></div>
+                            <div class="segment"></div>
+                            <div class="segment"></div>
+                        </div>
+                    </div>
+                    <div class="battery-info">
+                        <span id="battery-percent" class="battery-value">78%</span>
+                        <span id="battery-voltage" class="battery-detail">24.1V</span>
+                        <span id="battery-current" class="battery-detail">3.2A</span>
+                        <span id="battery-eta" class="battery-detail eta">~42dk</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Ping / Latency -->
+            <div class="telemetry-widget" id="ping-widget">
+                <div class="widget-label">GECİKME</div>
+                <div class="ping-display">
+                    <span id="ping-value" class="ping-value">22</span>
+                    <span class="ping-unit">ms</span>
+                </div>
+                <div class="ping-bar-container">
+                    <div id="ping-bar" class="ping-bar" style="width: 15%"></div>
+                </div>
+            </div>
+
+            <!-- Speed -->
+            <div class="telemetry-widget" id="speed-widget">
+                <div class="widget-label">HIZ</div>
+                <div class="speed-gauge">
+                    <canvas id="speed-canvas" width="160" height="100"></canvas>
+                    <div class="speed-digital">
+                        <span id="speed-value" class="speed-value">3.2</span>
+                        <span class="speed-unit">km/s</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Signal Strength -->
+            <div class="telemetry-widget" id="signal-widget">
+                <div class="widget-label">SİNYAL</div>
+                <div class="signal-display">
+                    <div class="signal-bars">
+                        <div class="signal-bar active" style="height: 20%"></div>
+                        <div class="signal-bar active" style="height: 40%"></div>
+                        <div class="signal-bar active" style="height: 60%"></div>
+                        <div class="signal-bar active" style="height: 80%"></div>
+                        <div class="signal-bar" style="height: 100%"></div>
+                    </div>
+                    <div class="signal-info">
+                        <span id="signal-dbm" class="signal-value">-52 dBm</span>
+                        <span id="signal-type" class="signal-detail">RF 915MHz</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- IMU / Orientation -->
+            <div class="telemetry-widget" id="imu-widget">
+                <div class="widget-label">YÖNELİM</div>
+                <div class="imu-display">
+                    <div class="imu-row">
+                        <span class="imu-label">Yalpa</span>
+                        <span id="imu-roll" class="imu-value">-1.2°</span>
+                    </div>
+                    <div class="imu-row">
+                        <span class="imu-label">Yunuslama</span>
+                        <span id="imu-pitch" class="imu-value">3.5°</span>
+                    </div>
+                    <div class="imu-row">
+                        <span class="imu-label">Sapma</span>
+                        <span id="imu-yaw" class="imu-value">127.8°</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- GPS -->
+            <div class="telemetry-widget" id="gps-widget">
+                <div class="widget-label">GPS</div>
+                <div class="gps-display">
+                    <div class="gps-row">
+                        <span id="gps-lat" class="gps-value">39.9255°K</span>
+                    </div>
+                    <div class="gps-row">
+                        <span id="gps-lon" class="gps-value">32.8661°D</span>
+                    </div>
+                    <div class="gps-row">
+                        <span class="gps-label">Uydu:</span>
+                        <span id="gps-sats" class="gps-value">12</span>
+                        <span class="gps-label" style="margin-left:8px">Fix:</span>
+                        <span id="gps-fix" class="gps-fix-status fix-3d">3D</span>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Center Panel: Camera + HUD -->
+        <section id="center-panel" class="panel">
+            <div class="panel-header">
+                <span class="panel-title">ANA KAMERA</span>
+                <div class="camera-controls">
+                    <button class="cam-btn" id="btn-cam-record" title="Kayıt">⏺</button>
+                    <button class="cam-btn" id="btn-cam-screenshot" title="Ekran Görüntüsü">📷</button>
+                    <button class="cam-btn active" id="btn-cam-overlay" title="AI Katmanı">AI</button>
+                    <button class="cam-btn active" id="btn-cam-hud" title="HUD">HUD</button>
+                </div>
+                <span class="panel-indicator active"></span>
+            </div>
+            <div class="camera-viewport" id="camera-viewport">
+                <canvas id="camera-canvas"></canvas>
+                <!-- HUD Overlay -->
+                <div id="hud-overlay" class="hud-overlay">
+                    <!-- Crosshair -->
+                    <div class="crosshair">
+                        <div class="crosshair-h"></div>
+                        <div class="crosshair-v"></div>
+                        <div class="crosshair-center"></div>
+                    </div>
+                    <!-- HUD Top -->
+                    <div class="hud-top">
+                        <div class="hud-compass">
+                            <div id="compass-strip" class="compass-strip"></div>
+                            <div class="compass-marker">▼</div>
+                        </div>
+                    </div>
+                    <!-- HUD Left -->
+                    <div class="hud-left-info">
+                        <div class="hud-item">
+                            <span class="hud-label">HIZ</span>
+                            <span id="hud-speed" class="hud-value">3.2 km/s</span>
+                        </div>
+                        <div class="hud-item">
+                            <span class="hud-label">HEDEF</span>
+                            <span id="hud-target" class="hud-value">245m</span>
+                        </div>
+                    </div>
+                    <!-- HUD Right -->
+                    <div class="hud-right-info">
+                        <div class="hud-item">
+                            <span class="hud-label">YÖN</span>
+                            <span id="hud-heading" class="hud-value">128° GD</span>
+                        </div>
+                        <div class="hud-item">
+                            <span class="hud-label">MOD</span>
+                            <span id="hud-mode" class="hud-value">MANUEL</span>
+                        </div>
+                    </div>
+                    <!-- HUD Bottom -->
+                    <div class="hud-bottom-info">
+                        <span id="hud-coords" class="hud-coords">39.9255°K  32.8661°D</span>
+                    </div>
+                    <!-- AI Bounding Boxes (dynamic) -->
+                    <div id="ai-overlay" class="ai-overlay"></div>
+                </div>
+                <!-- Camera Status -->
+                <div class="cam-status">
+                    <span class="cam-rec-dot" id="cam-rec-dot"></span>
+                    <span id="cam-fps">30 FPS</span>
+                    <span id="cam-res">1280×720</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- Right Panel: Map & Mission -->
+        <aside id="right-panel" class="panel">
+            <div class="panel-header">
+                <span class="panel-title">HARİTA</span>
+                <span class="panel-indicator active"></span>
+            </div>
+            <div class="map-container" id="map-container">
+                <div id="minimap"></div>
+                <div class="map-overlay-info">
+                    <span id="map-scale">1:500</span>
+                </div>
+            </div>
+
+            <div class="panel-header mission-header">
+                <span class="panel-title">GÖREV LİSTESİ</span>
+                <span class="panel-indicator active"></span>
+            </div>
+            <div class="mission-list" id="mission-list">
+                <div class="mission-item completed" data-mission="1">
+                    <div class="mission-check">✓</div>
+                    <div class="mission-info">
+                        <span class="mission-name">Başlangıç Noktası</span>
+                        <span class="mission-desc">Araç kalibre edildi</span>
+                    </div>
+                </div>
+                <div class="mission-item active" data-mission="2">
+                    <div class="mission-check current">2</div>
+                    <div class="mission-info">
+                        <span class="mission-name">Kavşak Geçişi</span>
+                        <span class="mission-desc">Sola dönüş yapılacak</span>
+                    </div>
+                </div>
+                <div class="mission-item" data-mission="3">
+                    <div class="mission-check">3</div>
+                    <div class="mission-info">
+                        <span class="mission-name">Engel Parkuru</span>
+                        <span class="mission-desc">Engelden kaçınma</span>
+                    </div>
+                </div>
+                <div class="mission-item" data-mission="4">
+                    <div class="mission-check">4</div>
+                    <div class="mission-info">
+                        <span class="mission-name">Yaya Geçidi</span>
+                        <span class="mission-desc">Yaya tespiti ve durma</span>
+                    </div>
+                </div>
+                <div class="mission-item" data-mission="5">
+                    <div class="mission-check">5</div>
+                    <div class="mission-info">
+                        <span class="mission-name">Park Alanı</span>
+                        <span class="mission-desc">Otonom park</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Gamepad Status -->
+            <div class="panel-header gamepad-header">
+                <span class="panel-title">GAMEPAD</span>
+                <span class="panel-indicator" id="gamepad-indicator"></span>
+            </div>
+            <div class="gamepad-widget" id="gamepad-widget">
+                <div class="gamepad-diagram">
+                    <div class="gp-layout">
+                        <div class="gp-stick left-stick">
+                            <div class="gp-stick-dot" id="gp-left-dot"></div>
+                            <span class="gp-label">Direksiyon</span>
+                        </div>
+                        <div class="gp-buttons-center">
+                            <div class="gp-btn-row">
+                                <span class="gp-btn gp-lt">LT<br><small>Fren</small></span>
+                                <span class="gp-btn gp-rt">RT<br><small>Gaz</small></span>
+                            </div>
+                            <div class="gp-btn-row">
+                                <span class="gp-btn gp-a">A<br><small>Korna</small></span>
+                                <span class="gp-btn gp-b">B<br><small>Far</small></span>
+                            </div>
+                            <div class="gp-btn-row">
+                                <span class="gp-btn gp-x">X<br><small>Sinyal L</small></span>
+                                <span class="gp-btn gp-y">Y<br><small>Sinyal R</small></span>
+                            </div>
+                        </div>
+                        <div class="gp-stick right-stick">
+                            <div class="gp-stick-dot" id="gp-right-dot"></div>
+                            <span class="gp-label">Kamera</span>
+                        </div>
+                    </div>
+                    <div class="gp-status" id="gp-status">Bağlı Değil</div>
+                </div>
+            </div>
+        </aside>
+    </main>
+
+    <!-- Bottom Panel: Controls & Log -->
+    <footer id="bottom-panel">
+        <div class="controls-section">
+            <div class="control-group">
+                <button id="btn-manuel" class="control-btn btn-manuel active" title="Manuel Kontrol">
+                    <span class="btn-icon">🎮</span>
+                    <span class="btn-label">MANUEL</span>
+                </button>
+                <button id="btn-otonom" class="control-btn btn-otonom" title="Otonom Sürüş">
+                    <span class="btn-icon">🤖</span>
+                    <span class="btn-label">OTONOM</span>
+                </button>
+                <div class="control-divider"></div>
+                <button id="btn-emergency" class="control-btn btn-emergency" title="Acil Durdurma">
+                    <span class="btn-icon">⛔</span>
+                    <span class="btn-label">ACİL DURDURMA</span>
+                </button>
+            </div>
+            <div class="confirm-toggle">
+                <label class="toggle-label">
+                    <input type="checkbox" id="confirm-toggle" checked>
+                    <span class="toggle-slider"></span>
+                    <span class="toggle-text">Onay Diyalogu</span>
+                </label>
+            </div>
+        </div>
+        <div class="log-section">
+            <div class="log-header">
+                <span class="log-title">SİSTEM LOGU</span>
+                <div class="log-controls">
+                    <button class="log-btn" id="btn-log-clear" title="Temizle">🗑</button>
+                    <button class="log-btn" id="btn-log-pause" title="Duraklat">⏸</button>
+                </div>
+            </div>
+            <div class="log-stream" id="log-stream">
+                <!-- Log entries will be dynamically added -->
+            </div>
+        </div>
+    </footer>
+
+    <!-- Confirmation Modal -->
+    <div id="confirm-modal" class="modal-overlay hidden">
+        <div class="modal-box">
+            <div class="modal-header">
+                <span class="modal-icon">⚠</span>
+                <span class="modal-title">MOD DEĞİŞİKLİĞİ</span>
+            </div>
+            <p id="modal-message" class="modal-message">Otonom sürüş başlatılsın mı?</p>
+            <div class="modal-actions">
+                <button id="modal-cancel" class="modal-btn modal-cancel">İPTAL</button>
+                <button id="modal-confirm" class="modal-btn modal-confirm">ONAYLA</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
